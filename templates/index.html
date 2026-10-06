@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VeriVault - Identity Verification</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <header class="header">
+            <div class="logo">VERIVAULT</div>
+            <div class="subtitle">AI-Powered Identity & Document Verification System</div>
+        </header>
+
+        <main class="main-content">
+            <div class="card upload-card">
+                <h2>Analyze identity documents</h2>
+                <p>Using AI-powered OCR, field extraction, validation, and basic tamper detection.</p>
+                
+                {% with messages = get_flashed_messages() %}
+                  {% if messages %}
+                    <div class="flashes">
+                    {% for message in messages %}
+                      <div class="flash-error">{{ message }}</div>
+                    {% endfor %}
+                    </div>
+                  {% endif %}
+                {% endwith %}
+
+                <form id="uploadForm" action="{{ url_for('scan_document') }}" method="POST" enctype="multipart/form-data">
+                    <div class="drop-zone" id="dropZone">
+                        <span class="drop-zone__prompt">Drag & Drop or Click to Upload Document</span>
+                        <input type="file" name="document" id="fileInput" class="drop-zone__input" accept=".jpg,.jpeg,.png" required>
+                    </div>
+                    <div class="format-info">Supported: JPG, JPEG, PNG | Maximum size: 10 MB</div>
+                    
+                    <button type="submit" class="btn primary-btn" id="analyzeBtn">Analyze Document</button>
+                </form>
+
+                <div id="loadingIndicator" class="loading-indicator hidden">
+                    <div class="spinner"></div>
+                    <p>Processing document... Please wait.</p>
+                    <small>Running OCR and validations.</small>
+                </div>
+            </div>
+
+            <div class="info-card">
+                <h3>Current Prototype Capabilities</h3>
+                <ul>
+                    <li>✓ Aadhaar-style document recognition</li>
+                    <li>✓ English & Hindi text extraction</li>
+                    <li>✓ Format & checksum validation</li>
+                    <li>✓ Basic image forensics (ELA)</li>
+                </ul>
+            </div>
+        </main>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verification Results — VeriVault</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <header class="header">
+            <div class="logo">VERIVAULT</div>
+            <a href="{{ url_for('index') }}" class="back-link">← Scan Another Document</a>
+        </header>
+
+        <main class="results-dashboard">
+            <!-- Overall Status -->
+            <div class="status-banner {{ overall_status | lower | replace(' ', '-') }}">
+                <h1>Overall Result: {{ overall_status }}</h1>
+            </div>
+
+            <div class="dashboard-grid">
+                <!-- Document Analysis -->
+                <div class="dashboard-card">
+                    <h3>Document Analysis</h3>
+                    <div class="data-row">
+                        <span class="label">Document Type:</span>
+                        <span class="value">{{ fields['Document Type'] }}</span>
+                    </div>
+                    <div class="data-row">
+                        <span class="label">OCR Engine:</span>
+                        <span class="value success">✓ Completed</span>
+                    </div>
+                </div>
+
+                <!-- Extracted Information -->
+                <div class="dashboard-card">
+                    <h3>Extracted Information</h3>
+                    <div class="data-row">
+                        <span class="label">Name:</span>
+                        <span class="value">{{ fields['Name'] }}</span>
+                    </div>
+                    <div class="data-row">
+                        <span class="label">Date of Birth:</span>
+                        <span class="value">{{ fields['DOB'] }}</span>
+                    </div>
+                    <div class="data-row">
+                        <span class="label">Gender:</span>
+                        <span class="value">{{ fields['Gender'] }}</span>
+                    </div>
+                    <div class="data-row">
+                        <span class="label">Document Number:</span>
+                        <span class="value">{{ fields['Document Number'] }}</span>
+                    </div>
+                </div>
+
+                <!-- Validation & Security -->
+                <div class="dashboard-card">
+                    <h3>Validation & Security</h3>
+                    <div class="data-row">
+                        <span class="label">Format Validation:</span>
+                        <span class="value {% if 'passed' in validation_status %}success{% else %}warning{% endif %}">
+                            {{ validation_status }}
+                        </span>
+                    </div>
+                    <div class="data-row">
+                        <span class="label">Tamper Detection:</span>
+                        <span class="value {% if tamper_status == 'CLEAN' %}success{% else %}warning{% endif %}">
+                            {{ tamper_status }}
+                        </span>
+                    </div>
+                    <div class="helper-text">{{ tamper_msg }}</div>
+                </div>
+
+                <!-- Scope Tracker -->
+                <div class="dashboard-card scope-card">
+                    <h3>Project Scope</h3>
+                    
+                    <h4>Current Milestone</h4>
+                    <ul class="scope-list done">
+                        <li>✓ Document upload</li>
+                        <li>✓ OCR</li>
+                        <li>✓ Field extraction</li>
+                        <li>✓ Basic validation</li>
+                        <li>✓ Tamper analysis</li>
+                    </ul>
+
+                    <h4 class="mt-4">Future Modules</h4>
+                    <ul class="scope-list pending">
+                        <li>○ Face verification</li>
+                        <li>○ Liveness detection</li>
+                        <li>○ Blockchain audit trail</li>
+                    </ul>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
