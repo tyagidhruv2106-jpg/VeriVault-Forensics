@@ -1,10 +1,29 @@
+# ============================================================
+# VeriVault Forensics — Python Dependencies
+# ============================================================
+# INSTALL ORDER MATTERS — see README.md for full setup steps.
+#
+# 1. Install PyTorch (CPU-only) FIRST via its own index:
+#    pip install torch==2.14.1 torchvision==0.29.1 --index-url https://download.pytorch.org/whl/cpu
+#
+# 2. Then install everything else:
+#    pip install -r requirements.txt
+#
+# 3. If numpy gets upgraded to 2.x during install, downgrade it:
+#    pip install "numpy==1.26.4"
+# ============================================================
+
 Flask==3.0.0
+Werkzeug==3.0.1
 easyocr==1.7.1
 opencv-python==4.8.1.78
 Pillow==10.1.0
 numpy==1.26.4
-Werkzeug==3.0.1
-torch>=2.0.0
-torchvision>=0.15.0
-scikit-learn>=1.3.0
-matplotlib>=3.7.0
+scikit-learn==1.9.1
+matplotlib==3.11.2
+
+# torch and torchvision must be installed separately (see above).
+# DO NOT install torch from this file — PyPI torch is CUDA-only
+# and will fail or pull the wrong binary.
+# torch>=2.0.0
+# torchvision>=0.15.0
