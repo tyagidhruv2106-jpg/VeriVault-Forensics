@@ -4,3 +4,8 @@ __pycache__/
 .env
 .env.*
 !.env.example
+
+# User uploads — ignore all uploaded files, keep folder via .gitkeep
+uploads/*
+!uploads/.gitkeep
+temp_ela.jpg

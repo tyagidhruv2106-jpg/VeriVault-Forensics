@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Universal AI Image & Manipulation Detector — VeriVault</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo-wrapper">
+                <a href="{{ url_for('index') }}" class="logo">VERIVAULT</a>
+                <span class="logo-badge">AI Forensics</span>
+            </div>
+            <div class="nav-links">
+                <a href="{{ url_for('index') }}" class="back-link">← Back to Home</a>
+            </div>
+        </header>
+
+        <!-- Subheader & Tabs Navigation -->
+        <div class="hero-section" style="margin-bottom: 1.5rem;">
+            <h1 class="hero-title" style="font-size: 1.85rem;">Universal AI Image & Manipulation Detector</h1>
+            <p class="hero-desc" style="font-size: 0.95rem;">
+                Dual-Stream EfficientNet-B0 deep learning model utilizing 6-channel RGB + ELA residual analysis and Grad-CAM explainability to classify authentic vs. AI-generated imagery.
+            </p>
+        </div>
+
+        <nav class="tabs-nav">
+            <button class="tab-btn purple-tab active" id="tabBtnDetector" onclick="switchTab('detector')">
+                🔍 Forensic Detector
+            </button>
+            <button class="tab-btn purple-tab" id="tabBtnMetrics" onclick="switchTab('metrics')">
+                📊 Model Performance & Metrics
+            </button>
+        </nav>
+
+        <!-- ========================================================= -->
+        <!-- TAB 1: FORENSIC DETECTOR -->
+        <!-- ========================================================= -->
+        <section id="tabDetector" class="tab-content active">
+            <!-- Upload Box -->
+            <div class="card upload-card text-center">
+                <h2>Upload Image for Forensic Inspection</h2>
+                <p class="subtitle-text">Analyzes portraits, landscapes, documents, social media photos, and artwork for generative synthesis or splicing.</p>
+
+                <div class="drop-zone purple-theme" id="aiDropZone">
+                    <div class="drop-zone__icon">🔬</div>
+                    <span class="drop-zone__prompt" id="aiDropPrompt">Drag & Drop or Click to Upload Image</span>
+                    <span class="drop-zone__sub">Supports JPG, PNG, WEBP (up to 15 MB)</span>
+                    <input type="file" id="aiFileInput" class="drop-zone__input" accept=".jpg,.jpeg,.png,.webp">
+                </div>
+
+                <!-- Quick Samples -->
+                <div class="sample-picker">
+                    <span class="sample-picker-label">Or test with benchmark samples:</span>
+                    <button type="button" class="btn secondary-btn btn-sm" onclick="testSample('sample_real')">
+                        📷 Test Real Photo
+                    </button>
+                    <button type="button" class="btn secondary-btn btn-sm" onclick="testSample('sample_ai')">
+                        🤖 Test AI-Generated Image
+                    </button>
+                </div>
+
+                <div class="format-info">Normalized to 224x224 RGB + Error Level Analysis residual dual tensor before inference.</div>
+
+                <button type="button" class="btn purple-btn" id="runAiDetectBtn" onclick="submitAiImage()">
+                    Run Forensic Analysis
+                </button>
+
+                <!-- Processing Animation -->
+                <div id="aiLoadingIndicator" class="loading-indicator hidden">
+                    <div class="spinner purple-spinner"></div>
+                    <p style="font-weight: 600; color: #f1f5f9;">Running Deep Learning Forensic Pipeline...</p>
+                    <small id="loadingStepText" style="color: var(--text-muted);">Extracting Error Level Analysis (ELA) residuals and computing Grad-CAM...</small>
+                </div>
+
+                <!-- Error notification -->
+                <div id="aiErrorBox" class="flash-error hidden" style="margin-top: 1.5rem; text-align: left;"></div>
+            </div>
+
+            <!-- ================= RESULTS DASHBOARD ================= -->
+            <div id="aiResultsSection" class="hidden">
+                <!-- Verdict Banner -->
+                <div id="verdictBanner" class="result-banner">
+                    <div class="verdict-title">
+                        <span id="verdictIcon">🛡️</span>
+                        <span id="verdictText">Authentic / Real</span>
+                    </div>
+                    <div class="confidence-chip" id="confidenceBadge">
+                        95.4% Confidence
+                    </div>
+                </div>
+
+                <!-- Probability Bar Card -->
+                <div class="prob-card">
+                    <div class="prob-header">
+                        <span style="color: var(--success);" id="probRealLabel">Authentic Probability: 85.0%</span>
+                        <span style="color: var(--danger);" id="probAiLabel">AI / Tampered Probability: 15.0%</span>
+                    </div>
+                    <div class="prob-bar-container">
+                        <div class="prob-bar-real" id="probBarReal" style="width: 85%;"></div>
+                        <div class="prob-bar-ai" id="probBarAi" style="width: 15%;"></div>
+                    </div>
+                </div>
+
+                <!-- Visual Forensics Triad -->
+                <h3 style="font-size: 1.15rem; margin-bottom: 1rem; color: #f8fafc;">Visual Forensics Triad</h3>
+                <div class="forensics-grid">
+                    <!-- 1. Original Image -->
+                    <div class="forensic-view-card">
+                        <h4>1. Original Image</h4>
+                        <p class="card-sub" id="imgDimensions">Dimensions: 224 x 224</p>
+                        <div class="forensic-img-wrap">
+                            <img id="viewOriginalImg" src="" alt="Original Upload">
+                        </div>
+                    </div>
+
+                    <!-- 2. Grad-CAM Explainable Attention -->
+                    <div class="forensic-view-card">
+                        <h4>2. Grad-CAM Attention Heatmap</h4>
+                        <p class="card-sub">Convolutional activation zones triggering prediction</p>
+                        <div class="forensic-img-wrap">
+                            <img id="viewGradcamImg" src="" alt="Grad-CAM Heatmap">
+                        </div>
+                    </div>
+
+                    <!-- 3. ELA Residual Representation -->
+                    <div class="forensic-view-card">
+                        <h4>3. ELA Residual Map</h4>
+                        <p class="card-sub">Compression error & quantization boundaries</p>
+                        <div class="forensic-img-wrap">
+                            <img id="viewElaImg" src="" alt="Error Level Analysis">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Forensic Explanation Card -->
+                <div class="diagnosis-card">
+                    <h3>Technical Forensic Diagnosis</h3>
+                    <ul class="diagnosis-list" id="diagnosisList">
+                        <!-- Populated dynamically via JS -->
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================= -->
+        <!-- TAB 2: MODEL PERFORMANCE & METRICS -->
+        <!-- ========================================================= -->
+        <section id="tabMetrics" class="tab-content">
+            <!-- KPI Summary Cards -->
+            <div class="metrics-kpi-grid">
+                <div class="kpi-card green-kpi">
+                    <div class="kpi-label">Test Accuracy</div>
+                    <div class="kpi-value" id="kpiAccuracy">
+                        {{ "%.1f"|format(metrics.get('test_accuracy', 0.8333) * 100) }}%
+                    </div>
+                    <div class="kpi-sub">Held-out Test Split</div>
+                </div>
+
+                <div class="kpi-card purple-kpi">
+                    <div class="kpi-label">Precision</div>
+                    <div class="kpi-value" id="kpiPrecision">
+                        {{ "%.1f"|format(metrics.get('precision', 1.0) * 100) }}%
+                    </div>
+                    <div class="kpi-sub">AI Manipulation Class</div>
+                </div>
+
+                <div class="kpi-card purple-kpi">
+                    <div class="kpi-label">Recall</div>
+                    <div class="kpi-value" id="kpiRecall">
+                        {{ "%.1f"|format(metrics.get('recall', 0.6667) * 100) }}%
+                    </div>
+                    <div class="kpi-sub">Sensitivity</div>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="kpi-label">F1-Score</div>
+                    <div class="kpi-value" id="kpiF1">
+                        {{ "%.1f"|format(metrics.get('f1_score', 0.80) * 100) }}%
+                    </div>
+                    <div class="kpi-sub">Harmonic Mean</div>
+                </div>
+
+                <div class="kpi-card gold-kpi">
+                    <div class="kpi-label">ROC-AUC</div>
+                    <div class="kpi-value" id="kpiAuc">
+                        {{ "%.4f"|format(metrics.get('roc_auc', 0.9244)) }}
+                    </div>
+                    <div class="kpi-sub">Discrimination Capacity</div>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="kpi-label">Dataset Size</div>
+                    <div class="kpi-value" id="kpiTotalSamples">
+                        {{ metrics.get('dataset_size', {}).get('total', 200) }}
+                    </div>
+                    <div class="kpi-sub">Train / Val / Test Samples</div>
+                </div>
+            </div>
+
+            <!-- Model Architecture Specifications -->
+            <div class="card upload-card" style="margin-bottom: 2rem;">
+                <h3 style="font-size: 1.15rem; margin-bottom: 0.5rem;">Forensic Neural Architecture & Training Specifications</h3>
+                <table class="specs-table">
+                    <tbody>
+                        <tr>
+                            <td class="spec-name">Model Backbone</td>
+                            <td class="spec-val">EfficientNet-B0 (ImageNet-1k Pretrained Transfer Learning)</td>
+                        </tr>
+                        <tr>
+                            <td class="spec-name">Input Modality</td>
+                            <td class="spec-val">Dual-Stream 6-Channel Input Tensor (3-channel RGB + 3-channel ELA Compression Residuals)</td>
+                        </tr>
+                        <tr>
+                            <td class="spec-name">Custom Classification Head</td>
+                            <td class="spec-val">AdaptiveAvgPool2d → Linear(1280, 256) → BatchNorm1d → SiLU → Dropout(p=0.4) → Linear(256, 2)</td>
+                        </tr>
+                        <tr>
+                            <td class="spec-name">Explainability Method</td>
+                            <td class="spec-val">Grad-CAM (Gradient-Weighted Class Activation Mapping) on <code>features[-1]</code> conv layer</td>
+                        </tr>
+                        <tr>
+                            <td class="spec-name">Augmentation & Regularization</td>
+                            <td class="spec-val">Random Horizontal Flip, Affine Rotation, JPEG Compression Simulation (Q=65–95), Label Smoothing</td>
+                        </tr>
+                        <tr>
+                            <td class="spec-name">Optimizer & Scheduler</td>
+                            <td class="spec-val">AdamW (lr=3e-4, weight_decay=1e-4) with ReduceLROnPlateau & EarlyStopping</td>
+                        </tr>
+                        <tr>
+                            <td class="spec-name">Target Forensics Domains</td>
+                            <td class="spec-val">Tiny-GenImage (Stable Diffusion, Midjourney, GANs) & CASIA 2.0 / CocoGlide (splicing & inpainting)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Visual Plots Gallery -->
+            <div class="metrics-plots-grid">
+                <!-- 1. Training & Validation Curves -->
+                <div class="metrics-plot-card">
+                    <h3>1. Training & Validation Learning Curves</h3>
+                    <p class="sub">Cross-Entropy Loss and Classification Accuracy plotted across training epochs.</p>
+                    <div class="plot-image-wrap">
+                        <img src="{{ url_for('static', filename='metrics/training_curves.png') }}" alt="Training and Validation Curves">
+                    </div>
+                </div>
+
+                <!-- 2. Confusion Matrix & ROC Curve Side by Side -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem;">
+                    <div class="metrics-plot-card">
+                        <h3>2. Test Set Confusion Matrix</h3>
+                        <p class="sub">Predictions on held-out test split (Authentic vs. AI-Manipulated).</p>
+                        <div class="plot-image-wrap">
+                            <img src="{{ url_for('static', filename='metrics/confusion_matrix.png') }}" alt="Confusion Matrix">
+                        </div>
+                    </div>
+
+                    <div class="metrics-plot-card">
+                        <h3>3. Receiver Operating Characteristic (ROC)</h3>
+                        <p class="sub">Sensitivity vs. (1 - Specificity) showing calculated ROC-AUC score.</p>
+                        <div class="plot-image-wrap">
+                            <img src="{{ url_for('static', filename='metrics/roc_curve.png') }}" alt="ROC Curve">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Epoch-by-Epoch History Table -->
+            {% if metrics.get('per_epoch_history') %}
+            <div class="card upload-card">
+                <h3 style="font-size: 1.15rem; margin-bottom: 1rem;">Per-Epoch Training Log History</h3>
+                <table class="specs-table">
+                    <thead>
+                        <tr style="text-align: left; color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase;">
+                            <th style="padding: 0.5rem;">Epoch</th>
+                            <th style="padding: 0.5rem;">Train Loss</th>
+                            <th style="padding: 0.5rem;">Train Acc</th>
+                            <th style="padding: 0.5rem;">Val Loss</th>
+                            <th style="padding: 0.5rem;">Val Acc</th>
+                            <th style="padding: 0.5rem;">Learning Rate</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% set history = metrics.get('per_epoch_history', {}) %}
+                        {% set num_epochs = history.get('train_loss', []) | length %}
+                        {% for i in range(num_epochs) %}
+                        <tr>
+                            <td style="padding: 0.6rem 0.5rem; font-weight: 700; color: var(--primary);">Epoch {{ i + 1 }}</td>
+                            <td style="padding: 0.6rem 0.5rem;">{{ history.get('train_loss')[i] }}</td>
+                            <td style="padding: 0.6rem 0.5rem; color: #6ee7b7;">{{ "%.2f"|format(history.get('train_acc')[i] * 100) }}%</td>
+                            <td style="padding: 0.6rem 0.5rem;">{{ history.get('val_loss')[i] }}</td>
+                            <td style="padding: 0.6rem 0.5rem; color: #c4b5fd;">{{ "%.2f"|format(history.get('val_acc')[i] * 100) }}%</td>
+                            <td style="padding: 0.6rem 0.5rem; color: var(--text-muted);">{{ history.get('lr')[i] }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endif %}
+        </section>
+    </div>
+
+    <!-- AI Detector JavaScript -->
+    <script src="{{ url_for('static', filename='js/ai_detector.js') }}"></script>
+</body>
+</html>
+

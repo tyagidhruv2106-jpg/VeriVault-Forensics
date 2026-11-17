@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const dropZone = document.getElementById('dropZone');
     const fileInput = document.getElementById('fileInput');
-    const prompt = document.querySelector('.drop-zone__prompt');
+    const prompt = dropZone ? dropZone.querySelector('.drop-zone__prompt') : null;
     const form = document.getElementById('uploadForm');
     const loadingIndicator = document.getElementById('loadingIndicator');
     const analyzeBtn = document.getElementById('analyzeBtn');

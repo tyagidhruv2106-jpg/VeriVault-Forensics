@@ -3,21 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VeriVault - Identity Verification</title>
+    <title>VeriVault — AI Image Forensics & Identity Verification</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="app-container">
+        <!-- Top Navigation Header -->
         <header class="header">
-            <div class="logo">VERIVAULT</div>
-            <div class="subtitle">AI-Powered Identity & Document Verification System</div>
+            <div class="logo-wrapper">
+                <a href="{{ url_for('index') }}" class="logo">VERIVAULT</a>
+                <span class="logo-badge">Forensics v2.0</span>
+            </div>
+            <nav class="nav-links">
+                <a href="#aadhaar-section" class="nav-link">Aadhaar Verifier</a>
+                <a href="{{ url_for('ai_detector_page') }}" class="nav-link">AI Image Detector</a>
+                <a href="{{ url_for('ai_detector_page') }}#metrics" class="nav-link">Model Metrics</a>
+            </nav>
         </header>
 
-        <main class="main-content">
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <h1 class="hero-title">Enterprise Image Forensics & Identity Verification</h1>
+            <p class="hero-desc">
+                Production-grade multi-modal forensics: detect AI-generated imagery and digital manipulations with deep neural networks, or verify Indian identity documents using Verhoeff checksums and compression analysis.
+            </p>
+        </section>
+
+        <!-- Two Primary Feature Cards -->
+        <section class="features-grid">
+            <!-- Feature Card 1: Aadhaar Check -->
+            <div class="feature-card">
+                <div>
+                    <span class="feature-tag blue">Identity Forensics</span>
+                    <h3>Aadhaar Card Authenticity Check</h3>
+                    <p>
+                        Dual-language OCR extraction coupled with mathematical Verhoeff D8 checksum validation and JPEG compression error level analysis.
+                    </p>
+                    <ul class="feature-list">
+                        <li><span class="check">✓</span> Mathematical Verhoeff Checksum Validation</li>
+                        <li><span class="check">✓</span> Dual-language (English + Hindi) EasyOCR Extraction</li>
+                        <li><span class="check">✓</span> JPEG Error Level Analysis (ELA) Tamper Heuristics</li>
+                        <li><span class="check">✓</span> PII Masking & Secure In-Memory Processing</li>
+                    </ul>
+                </div>
+                <a href="#aadhaar-section" class="btn secondary-btn">Use Aadhaar Verifier ↓</a>
+            </div>
+
+            <!-- Feature Card 2: Universal AI Detector -->
+            <div class="feature-card highlight">
+                <div>
+                    <span class="feature-tag purple">Deep Learning (EfficientNet-B0)</span>
+                    <h3>Universal AI Image & Manipulation Detector</h3>
+                    <p>
+                        Universal forensic classifier trained to distinguish authentic photography from AI-generated or AI-edited imagery across Midjourney, DALL-E, Stable Diffusion, GANs, and localized splicing.
+                    </p>
+                    <ul class="feature-list">
+                        <li><span class="check">✓</span> 6-Channel Dual-Stream RGB + ELA Residual Network</li>
+                        <li><span class="check">✓</span> Grad-CAM Attention Heatmaps for Explainability</li>
+                        <li><span class="check">✓</span> Works on Portraits, Documents, Artwork & Social Photos</li>
+                        <li><span class="check">✓</span> Interactive Academic Metrics & ROC-AUC Dashboard</li>
+                    </ul>
+                </div>
+                <a href="{{ url_for('ai_detector_page') }}" class="btn purple-btn">Launch AI Detector →</a>
+            </div>
+        </section>
+
+        <!-- Aadhaar Card Verification Section (100% Preserved Existing Functionality) -->
+        <section id="aadhaar-section" class="main-content">
             <div class="card upload-card">
-                <h2>Analyze identity documents</h2>
-                <p>Using AI-powered OCR, field extraction, validation, and basic tamper detection.</p>
+                <h2>Analyze Identity Documents</h2>
+                <p class="subtitle-text">Upload an Aadhaar Card for OCR field extraction, Verhoeff checksum validation, and basic tamper detection.</p>
                 
                 {% with messages = get_flashed_messages() %}
                   {% if messages %}
@@ -31,10 +87,12 @@
 
                 <form id="uploadForm" action="{{ url_for('scan_document') }}" method="POST" enctype="multipart/form-data">
                     <div class="drop-zone" id="dropZone">
-                        <span class="drop-zone__prompt">Drag & Drop or Click to Upload Document</span>
-                        <input type="file" name="document" id="fileInput" class="drop-zone__input" accept=".jpg,.jpeg,.png" required>
+                        <div class="drop-zone__icon">🪪</div>
+                        <span class="drop-zone__prompt">Drag & Drop or Click to Upload Aadhaar Document</span>
+                        <span class="drop-zone__sub">Accepts front or back side scans</span>
+                        <input type="file" name="document" id="fileInput" class="drop-zone__input" accept=".jpg,.jpeg,.png,.webp" required>
                     </div>
-                    <div class="format-info">Supported: JPG, JPEG, PNG | Maximum size: 10 MB</div>
+                    <div class="format-info">Supported: JPG, JPEG, PNG, WEBP | Maximum size: 10 MB</div>
                     
                     <button type="submit" class="btn primary-btn" id="analyzeBtn">Analyze Document</button>
                 </form>
@@ -42,20 +100,20 @@
                 <div id="loadingIndicator" class="loading-indicator hidden">
                     <div class="spinner"></div>
                     <p>Processing document... Please wait.</p>
-                    <small>Running OCR and validations.</small>
+                    <small style="color: var(--text-muted);">Running EasyOCR engine and Verhoeff mathematical validation.</small>
                 </div>
             </div>
 
             <div class="info-card">
-                <h3>Current Prototype Capabilities</h3>
-                <ul>
-                    <li>✓ Aadhaar-style document recognition</li>
-                    <li>✓ English & Hindi text extraction</li>
-                    <li>✓ Format & checksum validation</li>
-                    <li>✓ Basic image forensics (ELA)</li>
+                <h3>Aadhaar Module Verification Pipeline</h3>
+                <ul class="feature-list">
+                    <li><span class="check">✓</span> Aadhaar-style document recognition & structural bounding</li>
+                    <li><span class="check">✓</span> English & Hindi text extraction with EasyOCR</li>
+                    <li><span class="check">✓</span> 12-digit format & Verhoeff dihedral group D8 checksum verification</li>
+                    <li><span class="check">✓</span> Basic image forensics via JPEG Error Level Analysis (ELA)</li>
                 </ul>
             </div>
-        </main>
+        </section>
     </div>
 
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
